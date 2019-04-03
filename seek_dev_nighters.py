@@ -1,6 +1,7 @@
 import requests
 import datetime
 import sys
+import pytz
 
 url_template = 'http://devman.org/api/challenges/solution_attempts/'
 
@@ -39,8 +40,11 @@ def load_attempts():
 
 def get_midnighters(attempts):
     for attempt in attempts:
+        tz = pytz.timezone(attempt['timezone'])
         attempt_datetime = datetime.datetime.fromtimestamp(
-            attempt['timestamp'])
+            attempt['timestamp'],
+            tz=tz,
+        )
         if attempt_datetime.time().hour == 0:
             yield {
                 'username': attempt['username'],
@@ -59,7 +63,7 @@ def print_midnighter(midnighter):
 if __name__ == '__main__':
     attempts = load_attempts()
 
-    if not attempts:
+    if attempts is None:
         sys.exit("Connection error or server doesn't answer")
 
     print('Users who sent the tasks from 0 to 1 am:\n')
